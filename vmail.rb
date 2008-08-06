@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'net/smtp'
 require 'rmail'
+require 'tlsmail'
 require 'yaml'
 
 config = YAML.load_file('config.yml')
@@ -23,13 +24,13 @@ end
 
 message.body.each { |part|
 	if part.header['Content-Type'] =~ /^audio\//
-		path = "#{tmp_dir}/vmail#{$$}.wav"
-		output = "#{tmp_dir}/vmail#{$$}.mp3"
+		path = "#{config['temp_dir']}/vmail#{$$}.wav"
+		output = "#{config['temp_dir']}/vmail#{$$}.mp3"
 		f = File.new(path, 'w')
 		f.write(part.decode)
 		f.close
 
-		system "#{lame_path} --preset phone -v -q 0 -V 9 --tl Voicemail --ta Voicemail --tt \"Call from #{callerID} at #{callDate}\" --tg 28 --quiet #{path} #{output}"
+		system "#{config['lame_path']} --preset phone -v -q 0 -V 9 --tl Voicemail --ta Voicemail --tt \"Call from #{callerID} at #{callDate}\" --tg 28 --quiet #{path} #{output}"
 		File.delete(path)
 	end
 }
@@ -40,7 +41,7 @@ end
 
 # send email
 mail = RMail::Message.new
-mail.header.from = "Voicemail <#{config[processed_from_address]}>"
+mail.header.from = "Voicemail <#{config['processed_from_address']}>"
 mail.header.to = email
 mail.header.subject = "Voicemail from #{callerID} at #{callDate}"
 
@@ -55,15 +56,24 @@ part = RMail::Message::new
 part.header.set('Content-Type', 'audio/mpeg')
 part.header.set('Content-Disposition',
         'attachment',
-        'filename' => "Voicemail-#{callID}-#{callDate}.mp3")
+        'filename' => "Voicemail-#{callerID}-#{callDate}.mp3")
 part.header.set('Content-Transfer-Encoding', 'base64')
 File::open(output) do |fh|
   part.body = fh.sysread(File::size(output)).unpack('a*').pack('m')
 end
 mail.add_part(part)
 
-IO.popen("#{sendmail_path} #{email}", "w") do |sendmail|
-  sendmail.print mail
+print "Sending email to #{email}...\n"
+
+if config['use_smtp']
+  Net::SMTP.enable_tls(OpenSSL::SSL::VERIFY_NONE) if config['use_smtp_ssl']
+  Net::SMTP.start(config['smtp_server'], config['smtp_port'], config['smtp_domain'], config['processed_from_address'], config['smtp_password'], :login) do |smtp|
+  smtp.send_message(mail, config['processed_from_address'], email)
+  end
+else
+  IO.popen("#{config['sendmail_path']} #{email}", "w") do |sendmail|
+    sendmail.print mail
+  end
 end
 
 File.delete(output)

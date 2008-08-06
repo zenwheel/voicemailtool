@@ -2,3 +2,10 @@ processed_from_address: voicemail@yourserver
 lame_path: /usr/local/bin/lame
 sendmail_path: /usr/sbin/sendmail
 temp_dir: /tmp
+use_smtp: false
+use_smtp_ssl: true
+smtp_server: smtp.gmail.com
+smtp_port: 587
+smtp_domain: gmail.com
+smtp_password: ***
+
