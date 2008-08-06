@@ -1,0 +1,13 @@
+This is a script for converting an attached audio file to an MP3
+upon receipt of an email.  It can be invoked by adding something like
+this to your ~/.forward file:
+
+"|exec /usr/bin/ruby /home/vmail/vmail.rb || exit 75"
+
+It'll extract the attachment, encode it with lame, then build a new email
+message back to the address where the message originated with the MP3
+attached.
+
+This looks for the phone number in the username part of the From: address
+which is how my voicemail system works.
+
