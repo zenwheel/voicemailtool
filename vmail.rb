@@ -6,7 +6,7 @@ require 'rmail'
 require 'tlsmail'
 require 'yaml'
 
-config = YAML.load_file('config.yml')
+config = YAML.load_file(File.dirname(__FILE__) + "/config.yml")
 
 message = RMail::Parser.read(STDIN)
 
