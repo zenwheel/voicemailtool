@@ -27,7 +27,8 @@ end
 
 def id_to_url(s)
   s = s[0,s.length-3]
-  "#{config['salesforce_base_url']}/#{s}"
+#  "#{config['salesforce_base_url']}/#{s}"
+  "https://na5.salesforce.com/#{s}"
 end
 
 def lookup_account(p)
@@ -74,7 +75,7 @@ def lookup_phone(p)
       end
       cases = Case.find(:all, :conditions => {:contact_id=>c.id, :is_closed=>false})
 
-      result += "Contact for #{p} is <a href=\"#{id_to_url(c.id)}\">#{c.name}</a> (#{cases.length} open cases)\n"
+      result += "Contact for #{p} is #{c.name} (#{cases.length} open cases) - #{id_to_url(c.id)}\n"
     end
     if a.nil? == false
 #      print "Account ID is #{a.id}\n"
@@ -85,7 +86,7 @@ def lookup_phone(p)
       end
       cases = Case.find(:all, :conditions => {:account_id=>a.id, :is_closed=>false})
 
-      result += "Account for #{p} is <a href=\"#{id_to_url(a.id)}\">#{a.name}</a> (#{cases.length} open cases)\n"
+      result += "Account for #{p} is #{a.name} (#{cases.length} open cases) - #{id_to_url(a.id)}\n"
     end
   rescue Exception => e
     result += "Can't find #{p} in SalesForce - #{e.to_s}\n"
