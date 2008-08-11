@@ -106,7 +106,7 @@ output = nil;
 callDate = message.header.date.strftime('%I:%M%p %m/%d/%Y') 
 callerID = message.header.from[0].local
 if callerID =~ /^\d{10}$/
-  callerID = "#{callerID[0,3]}-#{callerID[3,3]}-#{callerID[6,4]}"
+  callerID = "(#{callerID[0,3]}) #{callerID[3,3]}-#{callerID[6,4]}"
 end
 
 message.body.each { |part|
