@@ -8,4 +8,7 @@ smtp_server: smtp.gmail.com
 smtp_port: 587
 smtp_domain: gmail.com
 smtp_password: ***
-
+salesforce_url: https://www.salesforce.com
+salesforce_user: myname@mydomain.com
+salesforce_password: ***
+salesforce_base_url: https://na5.salesforce.com
