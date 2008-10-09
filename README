@@ -4,10 +4,11 @@ this to your ~/.forward file:
 
 "|exec /usr/bin/ruby /home/vmail/vmail.rb || exit 75"
 
-It'll extract the attachment, encode it with lame, then build a new email
+It'll extract the attachment, encode it with 'lame', then build a new email
 message back to the address where the message originated with the MP3
-attached.
+attached.  The script is also dependent upon 'sox', to uncompress
+the source WAV file.
 
-This looks for the phone number in the username part of the From: address
-which is how my voicemail system works.
+This looks for the phone number in the subject of the email, this script is
+customized for the voicemail e-mail attachments from our NetSapiens PBX.
 

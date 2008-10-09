@@ -1,5 +1,6 @@
 processed_from_address: voicemail@yourserver
 lame_path: /usr/local/bin/lame
+sox_path: /usr/bin/sox
 sendmail_path: /usr/sbin/sendmail
 temp_dir: /tmp
 use_smtp: false

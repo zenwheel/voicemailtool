@@ -105,21 +105,27 @@ end
 email = message.header.to.format
 output = nil;
 callDate = message.header.date.strftime('%I:%M%p %m/%d/%Y') 
-callerID = message.header.from[0].local
-if callerID =~ /^\d{10}$/
+callerName = message.header.subject[12..message.header.subject.length]
+callerID = 'unknown'
+if callerName =~ /(\d{10})/
+  callerID = $1
   callerID = "(#{callerID[0,3]}) #{callerID[3,3]}-#{callerID[6,4]}"
 end
 
 message.body.each { |part|
 	if part.header['Content-Type'] =~ /^audio\//
 		path = "#{config['temp_dir']}/vmail#{$$}.wav"
+		pathtmp = "#{config['temp_dir']}/vmailx#{$$}.wav"
 		output = "#{config['temp_dir']}/vmail#{$$}.mp3"
 		f = File.new(path, 'w')
 		f.write(part.decode)
 		f.close
 
-		system "#{config['lame_path']} --preset phone -v -q 0 -V 9 --tl Voicemail --ta Voicemail --tt \"Call from #{callerID} at #{callDate}\" --tg 28 --quiet #{path} #{output}"
+		system "#{config['sox_path']} #{path} -u #{pathtmp}"
 		File.delete(path)
+
+		system "#{config['lame_path']} --preset voice -v -q 0 -V 9 --tl Voicemail --ta Voicemail --tt \"Call from #{callerName} at #{callDate}\" --tg 28 --quiet #{pathtmp} #{output}"
+		File.delete(pathtmp)
 	end
 }
 
@@ -131,13 +137,13 @@ end
 mail = RMail::Message.new
 mail.header.from = "Voicemail <#{config['processed_from_address']}>"
 mail.header.to = email
-mail.header.subject = "Voicemail from #{callerID} at #{callDate}"
+mail.header.subject = "Voicemail from #{callerName} at #{callDate}"
 
 content = RMail::Message::new
 content.header.set('Content-Type', 'text/plain',
         'charset' => 'us-ascii')
 content.header.set('Content-Disposition', 'inline')
-content.body = "You received a voicemail from #{callerID} at #{callDate}\n\n"
+content.body = "You received a voicemail from #{callerName} at #{callDate}\n\n"
 content.body += lookup_phone(callerID)
 mail.add_part(content)
 
